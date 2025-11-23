@@ -13,7 +13,7 @@ A simple, elegant to-do list application built with vanilla JavaScript, featurin
 
 ## Live Demo
 
-[View Live Demo](https://yourusername.github.io/todo-list) _(Update this link after deployment)_
+[View Live Demo](https://xaumre.github.io/todo-list)
 
 ## Getting Started
 
@@ -21,7 +21,7 @@ A simple, elegant to-do list application built with vanilla JavaScript, featurin
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/todo-list.git
+git clone https://github.com/xaumre/todo-list.git
 cd todo-list
 ```
 
