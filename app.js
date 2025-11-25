@@ -372,6 +372,9 @@ function handleLogout() {
     hideApp();
     authUI.showLoginForm();
     
+    // Clear login form fields to prevent browser caching
+    authUI.clearLoginForm();
+    
     // Show logout toast
     toast.info('Logged out', 'You have been logged out successfully.');
     
