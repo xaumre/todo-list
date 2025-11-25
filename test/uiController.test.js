@@ -237,6 +237,87 @@ describe('UI Controller', () => {
     });
   });
 
+  describe('Event Listener Management', () => {
+    /**
+     * Test that cleanup removes all event listeners
+     * Prevents duplicate notifications on logout/login cycles
+     */
+    it('should remove event listeners on cleanup', () => {
+      let addTaskCallCount = 0;
+      let deleteTaskCallCount = 0;
+      let toggleTaskCallCount = 0;
+
+      // Bind handlers
+      uiController.bindAddTask(() => { addTaskCallCount++; });
+      uiController.bindDeleteTask(() => { deleteTaskCallCount++; });
+      uiController.bindToggleTask(() => { toggleTaskCallCount++; });
+
+      // Trigger events
+      elements.form.dispatchEvent(new Event('submit'));
+      expect(addTaskCallCount).toBe(1);
+
+      // Create a task element to test delete and toggle
+      const task = createTask('Test task');
+      uiController.renderTasks([task]);
+      
+      const deleteButton = elements.taskList.querySelector('.delete-button');
+      const checkbox = elements.taskList.querySelector('.task-checkbox');
+      
+      deleteButton.click();
+      expect(deleteTaskCallCount).toBe(1);
+      
+      // Dispatch change event with bubbles: true so it reaches the taskList listener
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      expect(toggleTaskCallCount).toBe(1);
+
+      // Cleanup
+      uiController.cleanup();
+
+      // Trigger events again - handlers should not be called
+      elements.form.dispatchEvent(new Event('submit'));
+      expect(addTaskCallCount).toBe(1); // Still 1, not 2
+
+      deleteButton.click();
+      expect(deleteTaskCallCount).toBe(1); // Still 1, not 2
+      
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      expect(toggleTaskCallCount).toBe(1); // Still 1, not 2
+    });
+
+    /**
+     * Test that re-binding after cleanup doesn't create duplicate listeners
+     * This simulates the logout/login cycle
+     */
+    it('should not create duplicate listeners after cleanup and re-bind', () => {
+      let callCount = 0;
+
+      // First binding
+      uiController.bindToggleTask(() => { callCount++; });
+      
+      const task = createTask('Test task');
+      uiController.renderTasks([task]);
+      const checkbox = elements.taskList.querySelector('.task-checkbox');
+      
+      // First trigger - dispatch with bubbles: true
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      expect(callCount).toBe(1);
+
+      // Cleanup
+      uiController.cleanup();
+
+      // Re-bind (simulating new login)
+      uiController.bindToggleTask(() => { callCount++; });
+      
+      // Re-render task
+      uiController.renderTasks([task]);
+      const newCheckbox = elements.taskList.querySelector('.task-checkbox');
+      
+      // Second trigger - should only increment by 1, not 2
+      newCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+      expect(callCount).toBe(2); // Not 3
+    });
+  });
+
   describe('Unit Tests - Edge Cases', () => {
     /**
      * Test empty state display

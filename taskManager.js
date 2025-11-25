@@ -13,16 +13,18 @@ export class TaskManager {
   /**
    * Creates a new TaskManager instance
    * @param {StorageManager} storageManager - Storage manager instance for persistence
+   * @param {APIClient} apiClient - API client for backend communication (optional)
    */
-  constructor(storageManager) {
+  constructor(storageManager, apiClient = null) {
     this.storageManager = storageManager || new StorageManager();
+    this.apiClient = apiClient;
     this.tasks = this.storageManager.loadTasks();
   }
 
   /**
    * Adds a new task to the task list
    * @param {string} description - The task description
-   * @returns {Object|null} - The created task object or null if invalid
+   * @returns {Promise<Object|null>|Object|null} - The created task object or null if invalid
    */
   addTask(description) {
     // Validate description
@@ -30,7 +32,27 @@ export class TaskManager {
       return null;
     }
 
-    // Create new task
+    // If API client is available, use it
+    if (this.apiClient) {
+      return (async () => {
+        try {
+          const response = await this.apiClient.post('api/tasks', { description });
+          
+          // Extract task from response
+          const task = response.task || response;
+          
+          // Don't add to local array - let the caller reload tasks from API
+          // This prevents duplicates when re-rendering
+          
+          return task;
+        } catch (error) {
+          console.error('Error adding task via API:', error);
+          throw error;
+        }
+      })();
+    }
+
+    // Fallback to local storage
     const task = createTask(description);
     
     if (task === null) {
@@ -49,9 +71,28 @@ export class TaskManager {
   /**
    * Deletes a task from the task list
    * @param {string} id - The task ID to delete
-   * @returns {boolean} - True if task was deleted, false if not found
+   * @returns {Promise<boolean>|boolean} - True if task was deleted, false if not found
    */
   deleteTask(id) {
+    // If API client is available, use it
+    if (this.apiClient) {
+      return (async () => {
+        try {
+          await this.apiClient.delete(`api/tasks/${id}`);
+          
+          // Remove from local task list
+          const initialLength = this.tasks.length;
+          this.tasks = this.tasks.filter(task => task.id !== id);
+          
+          return this.tasks.length < initialLength;
+        } catch (error) {
+          console.error('Error deleting task via API:', error);
+          throw error;
+        }
+      })();
+    }
+
+    // Fallback to local storage
     const initialLength = this.tasks.length;
     
     // Filter out the task with the given id
@@ -71,7 +112,7 @@ export class TaskManager {
   /**
    * Toggles the completion status of a task
    * @param {string} id - The task ID to toggle
-   * @returns {boolean} - True if task was toggled, false if not found
+   * @returns {Promise<boolean>|boolean} - True if task was toggled, false if not found
    */
   toggleTaskCompletion(id) {
     // Find the task
@@ -81,6 +122,29 @@ export class TaskManager {
       return false;
     }
 
+    // If API client is available, use it
+    if (this.apiClient) {
+      return (async () => {
+        try {
+          const response = await this.apiClient.put(`api/tasks/${id}`, {
+            completed: !task.completed
+          });
+          
+          // Extract task from response
+          const updatedTask = response.task || response;
+          
+          // Update local task
+          task.completed = updatedTask.completed;
+          
+          return true;
+        } catch (error) {
+          console.error('Error toggling task via API:', error);
+          throw error;
+        }
+      })();
+    }
+
+    // Fallback to local storage
     // Toggle completion status
     task.completed = !task.completed;
 

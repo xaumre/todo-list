@@ -66,6 +66,89 @@ The application follows the MVC (Model-View-Controller) pattern:
 - **View**: DOM manipulation and UI rendering (UIController)
 - **Controller**: Event handling and coordination (TaskManager)
 
+## Notification System
+
+The application uses a dual notification system with clear separation of concerns:
+
+### Notification Types
+
+1. **Toast Notifications** (`ToastNotification` class)
+   - Temporary, auto-dismissing pop-up messages
+   - Used for operation feedback (success, error, info, warning)
+   - Appear in the top-right corner
+   - Auto-dismiss after 5 seconds (except errors which require manual dismissal)
+
+2. **Inline Messages** (`AuthUI` class)
+   - Persistent messages within forms
+   - Used exclusively for form validation errors
+   - Remain visible until corrected or form is switched
+   - Provide context-specific feedback
+
+### Notification Decision Matrix
+
+Use this matrix to determine which notification system to use when adding new features:
+
+| Event Type | Toast | Inline | Rationale |
+|------------|-------|--------|-----------|
+| Login success | ✓ | ✗ | Operation feedback |
+| Registration success | ✓ | ✗ | Operation feedback |
+| Logout | ✓ | ✗ | Operation feedback |
+| Form validation error | ✗ | ✓ | Validation feedback (user-focused context) |
+| Authentication server error | ✗ | ✓ | Form context feedback |
+| Session expiration | ✓ | ✓ | **EXCEPTION**: Toast for attention + inline for persistent context |
+| Task operation success | ✓ | ✗ | Operation feedback |
+| Task operation error | ✓ | ✗ | Operation feedback |
+
+### General Rules
+
+- **Toast notifications**: Use for completed asynchronous operations (success/error/info)
+- **Inline messages**: Use ONLY for client-side form validation errors
+- **Never trigger both systems** for the same event (except session expiration)
+- **Session expiration is the ONLY exception** where both are appropriate
+
+### Developer Examples
+
+#### Example 1: Showing a success toast for a task operation
+
+```javascript
+// ✓ CORRECT: Use toast for operation feedback
+toast.success('Task added', 'Your task has been added successfully.');
+
+// ✗ INCORRECT: Don't use inline messages for operations
+authUI.displaySuccess('Task added', 'login'); // Wrong!
+```
+
+#### Example 2: Showing validation errors
+
+```javascript
+// ✓ CORRECT: Use inline messages for validation errors
+const validation = authUI.validateLoginForm();
+if (!validation.valid) {
+  authUI.displayError(validation.errors.join('. '), 'login');
+  return;
+}
+
+// ✗ INCORRECT: Don't use toast for validation errors
+toast.error('Validation failed', 'Email is required'); // Wrong!
+```
+
+#### Example 3: Handling session expiration (special case)
+
+```javascript
+// ✓ CORRECT: Use BOTH for session expiration
+toast.dismissAll(); // Clear existing toasts first
+authUI.displayError('Your session has expired. Please log in again.', 'login');
+toast.warning('Session expired', 'Please log in again to continue.');
+```
+
+### Implementation Details
+
+For detailed implementation guidance, see:
+- Code comments in `app.js` (Notification Decision Matrix)
+- Code comments in `authUI.js` (Inline message strategy)
+- Code comments in `toastNotification.js` (Toast notification strategy)
+- Design document: `.kiro/specs/duplicate-notifications-fix/design.md`
+
 ## Testing
 
 This project uses a dual testing approach:

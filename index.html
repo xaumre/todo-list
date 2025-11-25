@@ -7,9 +7,127 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="app-container" role="main">
+  <!-- Authentication Forms -->
+  <div id="auth-container" class="auth-container" hidden>
+    <!-- Login Form -->
+    <div id="login-form-container" class="auth-form-container">
+      <h2 class="auth-title">Welcome Back</h2>
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email</label>
+          <input 
+            type="email" 
+            id="login-email" 
+            class="form-input" 
+            placeholder="Enter your email"
+            aria-label="Email address"
+            autocomplete="email"
+            required
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            class="form-input" 
+            placeholder="Enter your password"
+            aria-label="Password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+        
+        <button type="submit" class="auth-button" aria-label="Log in">
+          <span class="button-text">Log In</span>
+          <span class="button-spinner" hidden>
+            <span class="spinner"></span>
+          </span>
+        </button>
+        
+        <div class="auth-message" id="login-message" role="alert" aria-live="polite" hidden></div>
+        
+        <p class="auth-switch">
+          Don't have an account? 
+          <a href="#" id="show-register-link" class="auth-link">Sign up</a>
+        </p>
+      </form>
+    </div>
+    
+    <!-- Registration Form -->
+    <div id="register-form-container" class="auth-form-container" hidden>
+      <h2 class="auth-title">Create Account</h2>
+      <form id="register-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="register-email" class="form-label">Email</label>
+          <input 
+            type="email" 
+            id="register-email" 
+            class="form-input" 
+            placeholder="Enter your email"
+            aria-label="Email address"
+            autocomplete="email"
+            required
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="register-password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="register-password" 
+            class="form-input" 
+            placeholder="At least 8 characters"
+            aria-label="Password"
+            aria-describedby="password-hint"
+            autocomplete="new-password"
+            required
+            minlength="8"
+          >
+          <span id="password-hint" class="form-hint">Must be at least 8 characters</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="register-password-confirm" class="form-label">Confirm Password</label>
+          <input 
+            type="password" 
+            id="register-password-confirm" 
+            class="form-input" 
+            placeholder="Re-enter your password"
+            aria-label="Confirm password"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+        
+        <button type="submit" class="auth-button" aria-label="Sign up">
+          <span class="button-text">Sign Up</span>
+          <span class="button-spinner" hidden>
+            <span class="spinner"></span>
+          </span>
+        </button>
+        
+        <div class="auth-message" id="register-message" role="alert" aria-live="polite" hidden></div>
+        
+        <p class="auth-switch">
+          Already have an account? 
+          <a href="#" id="show-login-link" class="auth-link">Log in</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App (Task List) -->
+  <main class="app-container" role="main" hidden>
     <header>
-      <h1 id="app-title">My To-Do List</h1>
+      <div class="header-content">
+        <div>
+          <h1 id="app-title">My To-Do List</h1>
+          <p id="user-email" class="user-email"></p>
+        </div>
+        <button id="logout-button" class="logout-button" aria-label="Log out">Log Out</button>
+      </div>
     </header>
     
     <form id="add-task-form" class="task-form" aria-labelledby="app-title">
@@ -34,6 +152,17 @@
       </div>
     </div>
   </main>
+
+  <!-- Global Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" hidden>
+    <div class="loading-spinner-container">
+      <div class="loading-spinner-large"></div>
+      <div class="loading-text">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toast-container" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
 
   <script type="module" src="app.js"></script>
 </body>

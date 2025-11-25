@@ -25,6 +25,12 @@ export class UIController {
     this.addTaskHandler = null;
     this.deleteTaskHandler = null;
     this.toggleTaskHandler = null;
+    
+    // Store bound listener functions so we can remove them
+    this.boundSubmitListener = null;
+    this.boundClickListener = null;
+    this.boundChangeListener = null;
+    this.boundKeydownListener = null;
   }
 
   /**
@@ -135,13 +141,21 @@ export class UIController {
   bindAddTask(handler) {
     this.addTaskHandler = handler;
     
+    // Remove old listener if it exists
+    if (this.form && this.boundSubmitListener) {
+      this.form.removeEventListener('submit', this.boundSubmitListener);
+    }
+    
+    // Create and store bound listener
     if (this.form) {
-      this.form.addEventListener('submit', (e) => {
+      this.boundSubmitListener = (e) => {
         e.preventDefault();
         
         const description = this.input.value;
         handler(description);
-      });
+      };
+      
+      this.form.addEventListener('submit', this.boundSubmitListener);
     }
   }
 
@@ -152,9 +166,14 @@ export class UIController {
   bindDeleteTask(handler) {
     this.deleteTaskHandler = handler;
     
+    // Remove old listener if it exists
+    if (this.taskList && this.boundClickListener) {
+      this.taskList.removeEventListener('click', this.boundClickListener);
+    }
+    
+    // Create and store bound listener
     if (this.taskList) {
-      // Use event delegation for dynamically created delete buttons
-      this.taskList.addEventListener('click', (e) => {
+      this.boundClickListener = (e) => {
         if (e.target.classList.contains('delete-button')) {
           const taskItem = e.target.closest('.task-item');
           if (taskItem) {
@@ -162,7 +181,9 @@ export class UIController {
             handler(taskId);
           }
         }
-      });
+      };
+      
+      this.taskList.addEventListener('click', this.boundClickListener);
     }
   }
 
@@ -173,9 +194,14 @@ export class UIController {
   bindToggleTask(handler) {
     this.toggleTaskHandler = handler;
     
+    // Remove old listener if it exists
+    if (this.taskList && this.boundChangeListener) {
+      this.taskList.removeEventListener('change', this.boundChangeListener);
+    }
+    
+    // Create and store bound listener
     if (this.taskList) {
-      // Use event delegation for dynamically created checkboxes
-      this.taskList.addEventListener('change', (e) => {
+      this.boundChangeListener = (e) => {
         if (e.target.classList.contains('task-checkbox')) {
           const taskItem = e.target.closest('.task-item');
           if (taskItem) {
@@ -183,7 +209,9 @@ export class UIController {
             handler(taskId);
           }
         }
-      });
+      };
+      
+      this.taskList.addEventListener('change', this.boundChangeListener);
     }
   }
 
@@ -191,9 +219,14 @@ export class UIController {
    * Sets up keyboard navigation for accessibility
    */
   setupKeyboardNavigation() {
+    // Remove old listener if it exists
+    if (this.taskList && this.boundKeydownListener) {
+      this.taskList.removeEventListener('keydown', this.boundKeydownListener);
+    }
+    
+    // Create and store bound listener for task list
     if (this.taskList) {
-      // Handle keyboard navigation within task list
-      this.taskList.addEventListener('keydown', (e) => {
+      this.boundKeydownListener = (e) => {
         const target = e.target;
         
         // Handle Enter key on delete buttons
@@ -207,10 +240,13 @@ export class UIController {
           // Let browser handle this naturally
           return;
         }
-      });
+      };
+      
+      this.taskList.addEventListener('keydown', this.boundKeydownListener);
     }
 
-    // Ensure form submission works with Enter key
+    // Note: Input keydown listener is intentionally not stored/removed
+    // as it's a simple form submission helper that's safe to re-attach
     if (this.input) {
       this.input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -221,5 +257,33 @@ export class UIController {
         }
       });
     }
+  }
+
+  /**
+   * Cleanup method to remove all event listeners
+   * Call this before destroying the UIController instance
+   */
+  cleanup() {
+    if (this.form && this.boundSubmitListener) {
+      this.form.removeEventListener('submit', this.boundSubmitListener);
+    }
+    
+    if (this.taskList && this.boundClickListener) {
+      this.taskList.removeEventListener('click', this.boundClickListener);
+    }
+    
+    if (this.taskList && this.boundChangeListener) {
+      this.taskList.removeEventListener('change', this.boundChangeListener);
+    }
+    
+    if (this.taskList && this.boundKeydownListener) {
+      this.taskList.removeEventListener('keydown', this.boundKeydownListener);
+    }
+    
+    // Clear references
+    this.boundSubmitListener = null;
+    this.boundClickListener = null;
+    this.boundChangeListener = null;
+    this.boundKeydownListener = null;
   }
 }
