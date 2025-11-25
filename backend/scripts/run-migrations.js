@@ -15,6 +15,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 async function runMigrations() {
   const pool = new Pool({
     connectionString: config.databaseUrl,
+    ssl: {
+      rejectUnauthorized: false
+    }
   });
 
   try {
