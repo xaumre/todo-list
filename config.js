@@ -11,8 +11,7 @@ function getApiBaseUrl() {
   // Check if we're in production (deployed on Render)
   if (window.location.hostname.includes('onrender.com')) {
     // Production: Use the backend API URL
-    // TODO: Update this with your actual backend URL after deployment
-    return 'https://todolist-backend.onrender.com';
+    return 'https://todolist-backend-bjh6.onrender.com';
   }
   
   // Development: Use local backend
