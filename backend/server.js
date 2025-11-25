@@ -51,7 +51,6 @@ app.get('/health', (req, res) => {
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
-import migrationRoutes from './routes/migrationRoutes.js';
 
 // API routes
 app.get('/api', (req, res) => {
@@ -66,9 +65,6 @@ app.use('/api/auth', authRoutes);
 
 // Task routes
 app.use('/api/tasks', taskRoutes);
-
-// Migration routes (temporary - remove after migrations complete)
-app.use('/api', migrationRoutes);
 
 // Import error handler
 import { errorHandler } from './middleware/errorHandler.js';

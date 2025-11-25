@@ -13,7 +13,7 @@ This checklist will guide you through deploying the todo list application to Ren
 - [x] Database created: `todolist-db`
 - [x] Region: Virginia (US East)
 - [x] Database ID: `dpg-d4isqrogjchc73eu2ltg-a`
-- [ ] Database status: Available (check dashboard)
+- [x] Database status: Available (check dashboard)
 - [ ] Migrations run successfully
 
 ### Run Migrations
@@ -27,7 +27,7 @@ This checklist will guide you through deploying the todo list application to Ren
 **Option B: Using Migration Script**
 ```bash
 # Get Internal Database URL from Render dashboard
-export DATABASE_URL="[INTERNAL_DATABASE_URL]"
+export DATABASE_URL="postgresql://todolist_db_tds7_user:Dvq34OTWpFTGjQs5fNc9AQr6UyBTbXM5@dpg-d4isqrogjchc73eu2ltg-a/todolist_db_tds7"
 cd backend
 node scripts/run-migrations.js
 ```
